@@ -13,7 +13,7 @@ class InfiniteScroll extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Infinite Scroll'),
     );
   }
 }
@@ -27,13 +27,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final List<Map<String, dynamic>> _posts = [
+    {
+      'id': 1,
+      'title': 'Foo',
+      'body': 'Lorem',
+    },
+    {
+      'id': 2,
+      'title': 'Bar',
+      'body': 'Ipsum',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +46,17 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          final _post = _posts[index];
+
+          return ListTile(
+            title: Text(_post['title']),
+            subtitle: Text(_post['body']),
+          );
+        },
+        itemCount: _posts.length,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
