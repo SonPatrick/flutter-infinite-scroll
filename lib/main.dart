@@ -34,18 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
     BaseOptions(baseUrl: 'https://jsonplaceholder.typicode.com'),
   );
 
-  final List<Map<String, dynamic>> _posts = [
-    {
-      'id': 1,
-      'title': 'Foo',
-      'body': 'Lorem',
-    },
-    {
-      'id': 2,
-      'title': 'Bar',
-      'body': 'Ipsum',
-    },
-];
+  final List<Map<String, dynamic>> _posts = [];
 
   int _page = 1;
   int _limit = 10;
