@@ -9,12 +9,13 @@ class InfiniteScroll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Infinite Scroll',
+      title: 'Infinite Scroll',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -30,54 +31,110 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _http = Dio(
-    BaseOptions(baseUrl: 'https://reqres.in/'),
+    BaseOptions(baseUrl: 'https://jsonplaceholder.typicode.com'),
   );
 
-  final List<Map<String, dynamic>> _users = [];
+  final List<Map<String, dynamic>> _posts = [
+    {
+      'id': 1,
+      'title': 'Foo',
+      'body': 'Lorem',
+    },
+    {
+      'id': 2,
+      'title': 'Bar',
+      'body': 'Ipsum',
+    },
+];
+
+  int _page = 1;
+  int _limit = 10;
+
+  ScrollController _scrollController;
+
+  @override
+  void initState() {
+    _setupScrollController();
+
+    _fetch();
+
+    super.initState();
+  }
+
+  void _setupScrollController() {
+    _scrollController = ScrollController();
+
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >=
+        _scrollController.position.maxScrollExtent) {
+      _page++;
+
+      _fetch();
+    }
+  }
+
+  _fetch() {
+    _http.get('/posts?_start=$_page&_limit=$_limit').then((response) async {
+      final _fetchedPosts = (response.data as List)
+          .map((_user) => {
+                'id': _user['id'],
+                'title': _user['title'],
+                'body': 'body',
+              })
+          .toList();
+
+      setState(() {
+        _posts.addAll(_fetchedPosts);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Users: ${_users.length}'),
+        title: Text('Posts: ${_posts.length}'),
       ),
-      body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          final _post = _users[index];
+      body: Builder(
+        builder: (context) {
+          if (_posts.isEmpty) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-          return ListTile(
-            title: Text(
-              _post['name'],
-            ),
-            subtitle: Text(
-              _post['email'],
-            ),
+          return ListView.builder(
+            controller: _scrollController,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == _posts.length) {
+                return ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                );
+              } else {
+                final _post = _posts[index];
+
+                return ListTile(
+                  title: Text(
+                    _post['title'],
+                  ),
+                  subtitle: Text(
+                    _post['body'],
+                  ),
+                );
+              }
+            },
+            itemCount: _posts.length + 1,
           );
-        },
-        itemCount: _users.length,
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.refresh),
-        onPressed: () {
-          _fetchData(page: 1, limit: 10);
         },
       ),
     );
-  }
-
-  _fetchData({int page, int limit}) {
-    _http.get('/api/users?page=$page&per_page=$limit').then((response) {
-      final _fetchedUsers = (response.data['data'] as List)
-        .map((_user) => {
-          'id': _user['id'],
-          'email': _user['email'],
-          'name': '${_user['first_name']} ${_user['last_name']}',
-        })
-        .toList();
-
-      setState(() {
-        _users.addAll(_fetchedUsers);
-      });
-    });
   }
 }
