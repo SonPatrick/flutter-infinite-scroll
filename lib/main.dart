@@ -66,18 +66,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _fetch() {
-    _http.get('/posts?_start=$_page&_limit=$_limit').then((response) async {
-      final _fetchedPosts = (response.data as List)
+    _http.get('/posts?_start=$_page&_limit=$_limit')
+      .then((response) {
+        final _fetchedPosts = (response.data as List)
           .map((_user) => {
-                'id': _user['id'],
-                'title': _user['title'],
-                'body': 'body',
-              })
+            'id': _user['id'],
+            'title': _user['title'],
+            'body': 'body',
+          })
           .toList();
 
-      setState(() {
-        _posts.addAll(_fetchedPosts);
-      });
+        setState(() {
+          _posts.addAll(_fetchedPosts);
+        });
     });
   }
 
